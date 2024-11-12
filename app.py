@@ -4,7 +4,7 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user
+from flask_login import UserMixin, login_user, LoginManager, login_required, logout_user, current_user
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "FlaskPython"
@@ -38,7 +38,7 @@ class CartItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    
+   
     
 # Autenticação
 
@@ -138,10 +138,19 @@ def get_products():
          product_list.append(product_data)
     return jsonify(product_list)
 
-# Definir uma rota raiz (página inicial) e a função que será executada ao requisitar
-@app.route('/')
-def hello_world():
-    return 'Hello World'
+# checkout
+@app.route('/api/cart/add/<int:product_id>', methods=["POST"])
+@login_required
+def add_to_cart(product_id):
+    #Usuário
+    user = User.query.get(int(current_user.id))
+    #Produto
+    product = Product.query.get(product_id)
+    
+    if user and product:
+       cart_item = CartItem(user_id=user.id, product_id= product.id)
+       return jsonify({'message': 'Item added to cart successfully'})
+    return jsonify({'message': 'Failed to cart successfully'}), 400
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
