@@ -195,4 +195,3 @@ def checkout():
      return jsonify({'message': 'Checkout successful. Cart has been cleared.'})
 if __name__ == "__main__":
     app.run(port=5001, debug=True)
-
